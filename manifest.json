@@ -1,0 +1,32 @@
+{
+  "name": "Inbriefs",
+  "short_name": "Inbriefs",
+  "description": "A News App - Any News in 100 words",
+  "id": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/assets/inbriefs-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/inbriefs-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/inbriefs-512x192.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "display": "standalone",
+  "display_override": ["fullscreen", "minimal-ui"],
+  "background_color": "#191414",
+  "theme_color": "#fff",
+  "orientation": "portrait"
+}
