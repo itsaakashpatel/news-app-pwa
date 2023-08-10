@@ -33,7 +33,7 @@
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;600&display=swap"
       rel="stylesheet"
     />
-    <title>In briefs</title>
+    <title>In briefs - News in 50 words</title>
     <link rel="stylesheet" href="/style/main.css" />
     <link rel="manifest" href="/manifest.json" />
     <link
@@ -191,14 +191,40 @@
       href="/assets/apple-splash-1136-640.jpg"
       media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)"
     />
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <main class="container">
-      <header>
-        <img src="./assets/inbriefs-192x192.png" alt="logo" />
-        <h1>In briefs</h1>
-      </header>
+  <body class="w-full h-full full-height-container ">
+    <header class="flex flex-col justify-center items-center bg-blue-300 h-300">
+      <img
+        class="mb-5 w-20 h-20 mt-10"
+        src="./assets/inbriefs-192x192.png"
+        alt="logo"
+      />
+      <h1 class="text-2xl font-bold text-clifford text-center">Inbriefs! - News in 50 words</h1>
+      <nav class="bg-blue-500 mt-10 px-4 py-4 text-white w-full h-30">
+        <ul class="flex flex-row justify-between align-center w-full md:w-1/2 px-10">
+          <li><a href="./index.html" class="hover:underline">Home</a></li>
+          <li><a href="./all-news.html" class="hover:underline">All News</a></li>
+          <li><a href="./bookmarks-html" class="hover:underline">Saved Articles</a></li>
+          <!-- Add more menu options as needed -->
+        </ul>
+      </nav>
+    </header>
+    <!-- Main Content -->
+    <main class="container mx-auto my-6 p-4 md:my-10 md:p-10 overflow-y-auto max-h-screen">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="homeScreenData">
+        <!-- Article Card 1 -->
+        <!-- Add more article cards as needed -->
+      </div>
+      <div class="col-span-3 hidden" id="noArticlesError">
+        <p class="text-center text-gray-600">No articles available at the moment.</p>
+      </div>
     </main>
+    <footer class="flex flex-col justify-center items-center bg-blue-300 p-5">
+      <p class="container mx-auto text-center">
+        <p>&copy; 2023 News App. All rights reserved.</p>
+      </p>
+    </footer>
     <script src="./js/globals.js" type="module"></script>
     <script src="./js/main.js" type="module"></script>
     <script src="./js/scripts.js" type="text/javascript"></script>
