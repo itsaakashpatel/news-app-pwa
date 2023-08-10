@@ -2,7 +2,7 @@
 //self object refers to the service worker
 
 const CACHE_NAME = "inbriefs";
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 
 /**
  * Service Worker Install
@@ -82,7 +82,6 @@ self.addEventListener("activate", function (event) {
  */
 
 self.addEventListener("fetch", function (event) {
-  console.log("Service Worker: Fetching!!", event.request.url);
   if (!(event.request.url.indexOf("http") === 0)) return; // skip the request. if request is not made with http protocol
 
   if (event.request.method !== "GET") return; //skip the request if it is not a get request
