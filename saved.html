@@ -33,7 +33,7 @@
       href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;600&display=swap"
       rel="stylesheet"
     />
-    <title>In briefs - News in 50 words</title>
+    <title>In briefs - Saved Articles</title>
     <link rel="stylesheet" href="/style/main.css" />
     <link rel="manifest" href="/manifest.json" />
     <link
@@ -210,10 +210,10 @@
       </nav>
     </header>
     <!-- Main Content -->
-    <main class="container mx-auto my-6 p-4 md:my-10 md:p-10 overflow-y-auto max-h-screen">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="homeScreenData">
+    <main class="container mx-auto my-6 p-4 md:my-10 md:p-10 overflow-y-auto min-h-screen">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="savedArticlesData">
       </div>
-      <div class="col-span-3 hidden" id="noArticlesError">
+      <div class="col-span-3 hidden  max-h-screen" id="noArticlesError">
         <p class="text-center text-gray-600">No articles available at the moment.</p>
       </div>
     </main>
@@ -223,7 +223,7 @@
       </p>
     </footer>
     <script src="./js/globals.js" type="module"></script>
-    <script src="./js/main.js" type="module"></script>
+    <script src="./js/saved.js" type="module"></script>
     <script src="./js/scripts.js" type="text/javascript"></script>
   </body>
 </html>
