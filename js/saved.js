@@ -15,39 +15,34 @@ let news = [];
 window.addEventListener("DOMContentLoaded", loadData);
 
 async function loadData() {
-  if (localStorage.getItem("news")) {
-    news = JSON.parse(localStorage.getItem("news"));
-    homeScreen();
-  } else {
-    const data = await getNewsData();
-
-    if (data && data.length > 0) {
-      localStorage.setItem("news", JSON.stringify(data));
-      news = data;
-      homeScreen();
-    } else {
+  //Get data from firestore
+  getDocs(dbCollection)
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const newsArticle = {
+          id: doc.id,
+          title: doc.data().title,
+          url: doc.data().url,
+          source: doc.data().source,
+          image: doc.data().image,
+          description: doc.data().description,
+          publisedAt: doc.data().publisedAt,
+          content: doc.data().content,
+        };
+        news.push(newsArticle);
+      });
+      savedArticles();
+    })
+    .catch((error) => {
+      console.log("Error getting documents: ", error);
       const noArticle = document.getElementById("noArticlesError");
       noArticle.classList.remove("hidden");
-    }
-  }
+    });
 }
 
-async function getNewsData() {
-  //Make an api call to get the news
-  try {
-    const response = await fetch("https://news-akpatel.cyclic.app");
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return [];
-  }
-}
+function savedArticles() {
+  const savedArticles = document.querySelector("#savedArticlesData");
 
-function homeScreen() {
-  const homeScreen = document.querySelector("#homeScreenData");
-
-  console.log("🚀 ~ file: main.js:73 ~ homeScreen ~ news:", news);
   if (news && news.length > 0) {
     news.forEach((element) => {
       const {
@@ -56,17 +51,17 @@ function homeScreen() {
         title,
         description,
         link,
-        bookmarkButton,
-        bookmarkIcon,
+        deleteButton,
+        deleteIcon,
       } = newArticleBlock();
       imgElement.src = element.image;
       title.textContent = element.title;
       description.textContent = element.description;
       link.href = element.url;
       link.textContent = "Read More >>";
-      bookmarkIcon.src = "./../assets/bookmark-empty.png";
-      bookmarkIcon.alt = "Bookmark";
-      bookmarkButton.append(bookmarkIcon);
+      deleteIcon.src = "./../assets/bin.png";
+      deleteIcon.alt = "Bookmark";
+      deleteButton.append(deleteIcon);
 
       //create read more and bookmark button container
       const buttonContainer = document.createElement("div");
@@ -76,15 +71,19 @@ function homeScreen() {
         "align-center",
         "justify-between"
       );
-      buttonContainer.append(link, bookmarkButton);
+      buttonContainer.append(link, deleteButton);
 
-      bookmarkButton.addEventListener("click", () => {
-        console.log("CLICKING");
-        bookmarkArticle(element);
+      deleteButton.addEventListener("click", () => {
+        deleteArticle(element);
       });
       articleBlock.append(imgElement, title, description, buttonContainer);
-      homeScreen.append(articleBlock);
+      savedArticles.append(articleBlock);
     });
+  }
+
+  if (news.length === 0) {
+    const noArticle = document.getElementById("noArticlesError");
+    noArticle.classList.remove("hidden");
   }
 }
 
@@ -99,19 +98,17 @@ function newArticleBlock() {
   description.classList.add(["text-base", "text-gray-500"]);
   const link = document.createElement("a");
   link.className = "mt-2 text-blue-500 hover:underline";
-  const bookmarkButton = document.createElement("button");
-  const bookmarkIcon = document.createElement("img");
-  bookmarkButton.classList.add(
+  const deleteButton = document.createElement("button");
+  const deleteIcon = document.createElement("img");
+  deleteButton.classList.add(
     "mt-2",
     "px-3",
     "py-2",
     "bg-grey-500",
-    "text-white",
-    "rounded",
-    "focus:outline-none"
+    "text-white"
   );
 
-  bookmarkIcon.classList.add("w-5", "h-5", "mr-2");
+  deleteIcon.classList.add("w-5", "h-5", "mr-2");
 
   return {
     articleBlock,
@@ -119,21 +116,19 @@ function newArticleBlock() {
     title,
     description,
     link,
-    bookmarkButton,
-    bookmarkIcon,
+    deleteButton,
+    deleteIcon,
   };
 }
 
-const bookmarkArticle = async (element) => {
-  // Perform bookmark action and Firestore integration here
+const deleteArticle = async (element) => {
+  //Delete from DB
   try {
-    const newsId = await addDoc(dbCollection, element);
-    console.log(
-      "🚀 ~ file: main.js:132 ~ bookmarkArticle ~ newsId:",
-      newsId.id
-    );
-    return newsId;
+    const docRef = doc(db, FIRESTORE_DB_COLLECTION, element.id);
+    await deleteDoc(docRef);
+    alert("Article deleted successfully");
+    window.location.reload();
   } catch (error) {
-    console.log("Error adding document: ", error);
+    console.log("Error deleting document: ", error);
   }
 };
