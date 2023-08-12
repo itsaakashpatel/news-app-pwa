@@ -12,8 +12,33 @@ if ("serviceWorker" in navigator) {
 
   //check if service worker is ready and active
   navigator.serviceWorker.ready
-    .then(function (registration) {
-      console.log("Service worker is active!", registration.active);
+    .then(async function (registration) {
+      console.log("Service worker is active!");
+
+      try {
+        await navigator.permissions.query({
+          name: "periodic-background-sync",
+        });
+
+        await registration.periodicSync.register("sync-news", {
+          minInterval: 3000,
+        });
+
+        console.log("Periodic Sync registered!");
+      } catch (error) {
+        console.log("Periodic Sync could not be registered!", error);
+      }
+
+      if ("sync" in registration) {
+        registration.sync
+          .register("sync-data")
+          .then(() => {
+            console.log('Background sync registered with tag "sync-data"');
+          })
+          .catch((error) => {
+            console.error("Background sync registration failed:", error);
+          });
+      }
     })
     .catch(function (err) {
       console.error("Service worker is not ready!", err);

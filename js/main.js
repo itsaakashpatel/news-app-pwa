@@ -1,15 +1,13 @@
-import {
-  collection,
-  db,
-  FIRESTORE_DB_COLLECTION,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from "./globals.js";
+import { collection, db, FIRESTORE_DB_COLLECTION, addDoc } from "./globals.js";
+import { sendNotification } from "./settings.js";
 
 const dbCollection = collection(db, FIRESTORE_DB_COLLECTION);
+const notificationCollection = collection(db, "notifications");
+const channel = new BroadcastChannel("inbriefs-channel");
+
+const latitudeElement = document.getElementById("latitude");
+const longitudeElement = document.getElementById("longitude");
+
 let news = [];
 
 window.addEventListener("DOMContentLoaded", loadData);
@@ -128,12 +126,64 @@ const bookmarkArticle = async (element) => {
   // Perform bookmark action and Firestore integration here
   try {
     const newsId = await addDoc(dbCollection, element);
-    console.log(
-      "🚀 ~ file: main.js:132 ~ bookmarkArticle ~ newsId:",
-      newsId.id
-    );
-    return newsId;
+    sendNotification("You bookmarked an article");
   } catch (error) {
     console.log("Error adding document: ", error);
   }
 };
+
+// Listen for messages from the service worker
+channel.addEventListener("message", (event) => {
+  if (event.data.action === "sendDataToFirestore") {
+    sendDataToFirestore(event.data?.data.value);
+  }
+
+  if (event.data.action === "syncNews") {
+    getNewsData()
+      .then((data) => {
+        if (data && data.length > 0) {
+          localStorage.setItem("news", JSON.stringify(data));
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }
+});
+
+const sendDataToFirestore = async (value) => {
+  // Perform bookmark action and Firestore integration here
+  try {
+    const notificationId = await addDoc(notificationCollection, {
+      value: value,
+    });
+    return notificationId;
+  } catch (error) {
+    console.log("Error adding document: ", error);
+  }
+};
+
+//GEOLOCATION API
+
+if ("geolocation" in navigator) {
+  // Get current position
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // Update DOM with location data
+      latitudeElement.textContent = `Latitude: ${latitude}`;
+      longitudeElement.textContent = `Longitude: ${longitude}`;
+    },
+    (error) => {
+      console.error("Error getting location:", error);
+      latitudeElement.textContent = "Location not available";
+      longitudeElement.textContent = "Location not available";
+    }
+  );
+} else {
+  // Geolocation is not supported
+  latitudeElement.textContent = "Geolocation not supported";
+  longitudeElement.textContent = "Geolocation not supported";
+}
