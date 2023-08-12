@@ -2,12 +2,11 @@ import {
   collection,
   db,
   FIRESTORE_DB_COLLECTION,
-  addDoc,
   getDocs,
-  updateDoc,
   deleteDoc,
   doc,
 } from "./globals.js";
+import { sendNotification } from "./settings.js";
 
 const dbCollection = collection(db, FIRESTORE_DB_COLLECTION);
 let news = [];
@@ -126,7 +125,7 @@ const deleteArticle = async (element) => {
   try {
     const docRef = doc(db, FIRESTORE_DB_COLLECTION, element.id);
     await deleteDoc(docRef);
-    alert("Article deleted successfully");
+    sendNotification("Article deleted successfully");
     window.location.reload();
   } catch (error) {
     console.log("Error deleting document: ", error);

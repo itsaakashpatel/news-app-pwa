@@ -211,6 +211,11 @@
     </header>
     <!-- Main Content -->
     <main class="container mx-auto my-6 p-4 md:my-10 md:p-10 overflow-y-auto max-h-screen">
+      <div id="location-container" class="p-4 border rounded-lg my-4">
+        <h2 class="text-lg font-semibold mb-2">Hey, there - Your Current Location</h2>
+        <p id="latitude" class="mb-1 font-semibold">Latitude: </p>
+        <p id="longitude" class="mb-1 font-semibold">Longitude: </p>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="homeScreenData">
       </div>
       <div class="col-span-3 hidden" id="noArticlesError">
@@ -224,6 +229,7 @@
     </footer>
     <script src="./js/globals.js" type="module"></script>
     <script src="./js/main.js" type="module"></script>
+    <script src="./js/settings.js" type="module"></script>
     <script src="./js/scripts.js" type="text/javascript"></script>
   </body>
 </html>

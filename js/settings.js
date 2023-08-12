@@ -21,15 +21,14 @@ request.onupgradeneeded = (event) => {
 
 request.onsuccess = (event) => {
   db = event.target.result;
+  if (!notificationToggle) return;
   console.log("Database opened successfully!", { db });
+
   if (!db.objectStoreNames.contains("settings")) {
     db.createObjectStore("settings");
     console.log("Object store created successfully!");
   }
-};
 
-//Onload restore the notification toggle status
-window.addEventListener("load", () => {
   //Get the notification status from local DB
   const tx = db.transaction("settings", "readonly");
   const store = tx.objectStore("settings");
@@ -47,7 +46,7 @@ window.addEventListener("load", () => {
       notificationToggle.checked = true;
     } else notificationToggle.checked = false;
   };
-});
+};
 
 // Function to handle toggle action
 const toggleNotifications = async () => {
@@ -93,22 +92,70 @@ const changeNotificationStatus = (status) => {
   };
 
   request.onsuccess = (event) => {
-    if (event.target.result) {
+    if (status) {
       notificationToggle.checked = status;
-      //Permission is granted, send the notification and hide sendNotifications button
-      sendNotifications("You have enabled notifications");
+      //Permission is granted, send the notification
+      sendNotification("You have enabled notifications");
     } else {
       notificationToggle.checked = false;
     }
   };
 };
 
-function sendNotifications(msg) {
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = window.indexedDB.open("inbriefs", 1);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      db.createObjectStore("settings", { keyPath: "id", autoIncrement: true });
+    };
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (event) => {
+      reject(event.error);
+    };
+  });
+}
+
+const getNotificationStatus = async () => {
+  //Get the notification status from local DB
+  const db = await openDatabase();
+  const tx = db.transaction("settings", "readonly");
+  const store = tx.objectStore("settings");
+
+  return new Promise((resolve, reject) => {
+    const request = store.get("notifications");
+    request.onerror = function (event) {
+      console.error(
+        "Error getting notification settings from local:",
+        event.target.errorCode
+      );
+      reject(false);
+    };
+
+    request.onsuccess = function (event) {
+      if (event.target.result) {
+        resolve(true);
+      } else resolve(false);
+    };
+  });
+};
+
+async function sendNotification(msg) {
   const notificationOptions = {
     body: msg || "",
     icon: "./assets/inbriefs-512x512.png",
     image: "./assets/inbriefs-192x192",
   };
+
+  console.log("Sending notification!", await getNotificationStatus());
+
+  if ((await getNotificationStatus()) === false) return;
 
   navigator.serviceWorker.ready
     .then((registration) => {
@@ -123,6 +170,7 @@ function sendNotifications(msg) {
 }
 
 // Add event listener for the toggle switch
-notificationToggle.addEventListener("change", toggleNotifications);
+if (notificationToggle)
+  notificationToggle.addEventListener("change", toggleNotifications);
 
-export { sendNotifications };
+export { sendNotification };

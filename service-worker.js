@@ -1,8 +1,8 @@
 // Inside service worker document and window doesn't exist
 //self object refers to the service worker
-
 const CACHE_NAME = "inbriefs";
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 8;
+const channel = new BroadcastChannel("inbriefs-channel");
 
 /**
  * Service Worker Install
@@ -26,6 +26,9 @@ self.addEventListener("install", function (event) {
           "/index.html",
           "/offline.html",
           "/js/scripts.js",
+          "/js/settings.js",
+          "/js/main.js",
+          "/js/notifications.js",
           "/style/main.css",
           "/manifest.json",
           "/assets/inbriefs-100.png",
@@ -85,8 +88,6 @@ self.addEventListener("fetch", function (event) {
 
   if (event.request.method !== "GET") return; //skip the request if it is not a get request
 
-  console.log("Service Worker: Fetching", event.request.url);
-
   //Caching strategy: Stale while revalidate
   event.respondWith(
     caches
@@ -114,3 +115,68 @@ self.addEventListener("fetch", function (event) {
       })
   );
 });
+
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === "sync-news") {
+    channel.postMessage({
+      action: "syncNews",
+    });
+  }
+});
+
+//Background sync
+// In your service worker
+self.addEventListener("sync", (event) => {
+  if (event.tag === "sync-data") {
+    event.waitUntil(syncData());
+  }
+});
+
+// Function to sync data
+async function syncData() {
+  const db = await openDatabase();
+  const transaction = db.transaction("settings", "readonly");
+  const store = transaction.objectStore("settings");
+  const request = store.get("notifications");
+
+  request.onerror = function (event) {
+    console.error(
+      "Error getting notification settings from local:",
+      event.target.errorCode
+    );
+  };
+
+  request.onsuccess = function (event) {
+    if (event.target.result) {
+      channel.postMessage({
+        action: "sendDataToFirestore",
+        data: { value: true },
+      });
+    } else
+      channel.postMessage({
+        action: "sendDataToFirestore",
+        data: { value: false },
+      });
+  };
+}
+
+// Function to open an IndexedDB database
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("inbriefs", 1);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      db.createObjectStore("settings", { keyPath: "id", autoIncrement: true });
+    };
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (event) => {
+      reject(event.error);
+    };
+  });
+}
