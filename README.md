@@ -1,5 +1,5 @@
 # news-app-pwa
 
-Building a news app with PWA support
+Building a news app with PWA support. It shows all trending news with notifications.
 
-Live URL: Yet to update
+Live URL: https://news-app-pwa.vercel.app/
